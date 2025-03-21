@@ -2,7 +2,10 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\PostStatusType;
+use App\Models\Post;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StorePostRequest extends FormRequest
 {
@@ -11,7 +14,7 @@ class StorePostRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,7 +25,11 @@ class StorePostRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'title' => ['required', 'string', 'max:255'],
+            'content' => ['required', 'string'],
+            'image' => ['required', 'image', 'mimes:jpeg,png,jpg,gif,svg', 'max:2048'],
+            'published_at' => ['required', 'date'],
+            'status' => ['required', 'string', 'max:255', Rule::enum(PostStatusType::class)],
         ];
     }
 }

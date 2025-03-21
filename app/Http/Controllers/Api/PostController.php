@@ -1,10 +1,14 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Controller;
 use App\Http\Requests\StorePostRequest;
 use App\Http\Requests\UpdatePostRequest;
 use App\Models\Post;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class PostController extends Controller
 {
@@ -27,9 +31,27 @@ class PostController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StorePostRequest $request)
+    public function store(StorePostRequest $request): JsonResponse
     {
-        //
+        $validatedData = $request->validated();
+        $validatedData['image'] = $request->file('image')->store('images');
+
+        DB::transaction(function () use ($validatedData) {
+            $post = Post::create([
+                'title' => $validatedData['title'],
+                'content' => $validatedData['content'],
+                'image' => $validatedData['image'],
+                'published_at' => $validatedData['published_at'],
+                'status' => $validatedData['status'],
+                'user_id' => auth()->user()->id,
+            ]);
+
+            $post->update(['slug' => Str::slug($validatedData['title'] . '-' . $post->id)]);
+        });
+
+        return response()->json([
+            'message' => 'Post created successfully',
+        ], 201);
     }
 
     /**

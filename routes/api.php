@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Api\Auth\RegisteredUserController;
+use App\Http\Controllers\Api\PostController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -14,4 +15,6 @@ Route::post('/register', [RegisteredUserController::class, 'store']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/logout', [AuthenticatedSessionController::class, 'destroy']);
+
+    Route::resource('posts', PostController::class)->except(['index', 'show', 'create', 'edit']);
 });
