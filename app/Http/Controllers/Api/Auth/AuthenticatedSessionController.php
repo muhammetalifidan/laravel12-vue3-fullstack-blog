@@ -26,7 +26,6 @@ class AuthenticatedSessionController extends Controller
         ], 200);
     }
 
-
     /**
      * Logout a user.
      * @param \Illuminate\Http\Request $request
