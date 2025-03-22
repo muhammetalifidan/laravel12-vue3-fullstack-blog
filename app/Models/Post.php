@@ -6,6 +6,7 @@ use App\Enums\PostStatusType;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
@@ -35,6 +36,16 @@ class Post extends Model implements HasMedia
         return $this->belongsTo(User::class);
     }
 
+    public function categories(): BelongsToMany
+    {
+        return $this->belongsToMany(Category::class);
+    }
+
+    public function scopeWithoutCategories($query)
+    {
+        return $query->whereDoesntHave('categories');
+    }
+
     public function scopePublished($query)
     {
         return $query->where('status', 'published');
@@ -43,5 +54,10 @@ class Post extends Model implements HasMedia
     public function scopeDraft($query)
     {
         return $query->where('status', 'draft');
+    }
+
+    public function scopeTrashed($query)
+    {
+        return $query->onlyTrashed();
     }
 }

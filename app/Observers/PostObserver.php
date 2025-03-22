@@ -6,7 +6,6 @@ use App\Events\PostCreated;
 use App\Events\PostDeleted;
 use App\Events\PostUpdated;
 use App\Models\Post;
-use Illuminate\Support\Str;
 
 class PostObserver
 {

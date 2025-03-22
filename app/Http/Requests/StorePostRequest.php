@@ -30,6 +30,8 @@ class StorePostRequest extends FormRequest
             'image' => ['required', 'image', 'mimes:jpeg,png,jpg', 'max:2048'],
             'published_at' => ['required', 'date'],
             'status' => ['required', 'string', Rule::enum(PostStatusType::class)],
+            'category_ids' => ['required', 'array'],
+            'category_ids.*' => ['exists:categories,id'],
         ];
     }
 }

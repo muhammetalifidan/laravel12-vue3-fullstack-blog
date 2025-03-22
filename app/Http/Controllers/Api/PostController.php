@@ -8,6 +8,7 @@ use App\Http\Requests\UpdatePostRequest;
 use App\Http\Resources\PostResource;
 use App\Models\Post;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
 
@@ -43,14 +44,18 @@ class PostController extends Controller
 
         $validatedData = $request->validated();
 
-        $post = Post::create([
-            'user_id' => auth()->user()->id,
-            'title' => $validatedData['title'],
-            'slug' => Str::slug($validatedData['title'] . '-' . time()),
-            'content' => $validatedData['content'],
-            'published_at' => $validatedData['published_at'],
-            'status' => $validatedData['status'],
-        ]);
+        DB::transaction(function () use ($validatedData, &$post) {
+            $post = Post::create([
+                'user_id' => auth()->user()->id,
+                'title' => $validatedData['title'],
+                'slug' => Str::slug($validatedData['title'] . '-' . time()),
+                'content' => $validatedData['content'],
+                'published_at' => $validatedData['published_at'],
+                'status' => $validatedData['status'],
+            ]);
+
+            $post->categories()->attach($validatedData['category_ids']);
+        });
 
         $post->addMediaFromRequest('image')->toMediaCollection();
 
@@ -89,13 +94,17 @@ class PostController extends Controller
 
         $validatedData = $request->validated();
 
-        $post->update([
-            'title' => $validatedData['title'],
-            'slug' => Str::slug($validatedData['title'] . '-' . time()),
-            'content' => $validatedData['content'],
-            'published_at' => $validatedData['published_at'],
-            'status' => $validatedData['status'],
-        ]);
+        DB::transaction(function () use ($validatedData, $post) {
+            $post->update([
+                'title' => $validatedData['title'],
+                'slug' => Str::slug($validatedData['title'] . '-' . time()),
+                'content' => $validatedData['content'],
+                'published_at' => $validatedData['published_at'],
+                'status' => $validatedData['status'],
+            ]);
+
+            $post->categories()->sync($validatedData['category_ids']);
+        });
 
         if ($request->hasFile('image')) {
             $post->clearMediaCollection();
@@ -117,7 +126,11 @@ class PostController extends Controller
         Gate::authorize('delete', $post);
 
         $post->clearMediaCollection();
-        $post->delete();
+
+        DB::transaction(function () use ($post) {
+            $post->categories()->detach();
+            $post->delete();
+        });
 
         return response()->json([
             'status' => true,
