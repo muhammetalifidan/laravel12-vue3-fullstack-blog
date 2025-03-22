@@ -19,7 +19,7 @@ class PostResource extends JsonResource
             'title' => $this->title,
             'slug' => $this->slug,
             'content' => $this->content,
-            'image' => $this->image,
+            'image' => $this->getFirstMediaUrl(),
             'published_at' => $this->published_at,
             'status' => $this->status,
             'user' => new UserResource($this->user),

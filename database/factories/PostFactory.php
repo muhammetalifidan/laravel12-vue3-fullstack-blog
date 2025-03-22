@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Enums\PostStatusType;
+use App\Models\Post;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -21,10 +22,16 @@ class PostFactory extends Factory
             'title' => fake()->sentence(10),
             'slug' => fake()->slug(3),
             'content' => fake()->paragraph(10),
-            'image' => fake()->imageUrl(640, 480),
             'published_at' => fake()->dateTimeBetween('-1 week', '+1 week'),
             'status' => fake()->randomElement(PostStatusType::cases())->value,
             'user_id' => fake()->numberBetween(1, 3),
         ];
+    }
+
+    public function configure()
+    {
+        return $this->afterCreating(function (Post $post) {
+            $post->addMedia(public_path('sample-images/default-post-image.jpg'))->preservingOriginal()->toMediaCollection();
+        });
     }
 }

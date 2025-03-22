@@ -27,7 +27,7 @@ class StorePostRequest extends FormRequest
         return [
             'title' => ['required', 'string', 'max:255'],
             'content' => ['required', 'string'],
-            'image' => ['required', 'image', 'mimes:jpeg,png,jpg,gif,svg', 'max:2048'],
+            'image' => ['required', 'image', 'mimes:jpeg,png,jpg', 'max:2048'],
             'published_at' => ['required', 'date'],
             'status' => ['required', 'string', 'max:255', Rule::enum(PostStatusType::class)],
         ];

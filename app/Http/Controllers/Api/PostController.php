@@ -36,16 +36,18 @@ class PostController extends Controller
         Gate::authorize('create', Post::class);
 
         $validatedData = $request->validated();
-        $validatedData['image'] = $request->file('image')->store('images');
 
         $post = Post::create([
             'user_id' => auth()->user()->id,
             'title' => $validatedData['title'],
             'content' => $validatedData['content'],
-            'image' => $validatedData['image'],
             'published_at' => $validatedData['published_at'],
             'status' => $validatedData['status'],
         ]);
+
+        if ($request->hasFile('image')) {
+            $post->addMediaFromRequest('image')->toMediaCollection();
+        }
 
         return response()->json([
             'status' => true,
