@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Enums\PostStatusType;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StorePostRequest;
 use App\Http\Requests\UpdatePostRequest;
@@ -71,6 +72,10 @@ class PostController extends Controller
      */
     public function show(Post $post): JsonResponse
     {
+        if ($post->status !== PostStatusType::PUBLISHED->value) {
+            return response()->json(['status' => false, 'message' => 'Post not published'], 403);
+        }
+
         return response()->json([
             'status' => true,
             'data' => new PostResource($post)
@@ -129,6 +134,7 @@ class PostController extends Controller
 
         DB::transaction(function () use ($post) {
             $post->categories()->detach();
+            $post->comments()->delete();
             $post->delete();
         });
 
