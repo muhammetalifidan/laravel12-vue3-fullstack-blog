@@ -45,9 +45,7 @@ class PostController extends Controller
             'status' => $validatedData['status'],
         ]);
 
-        if ($request->hasFile('image')) {
-            $post->addMediaFromRequest('image')->toMediaCollection();
-        }
+        $post->addMediaFromRequest('image')->toMediaCollection();
 
         return response()->json([
             'status' => true,

@@ -13,6 +13,17 @@ class PostObserver
     public function created(Post $post): void
     {
         $post->update(['slug' => Str::slug($post->title . '-' . $post->id)]);
+
+        activity()
+            ->performedOn($post)
+            ->withProperties([
+                'user_id' => $post->user_id,
+                'title' => $post->title,
+                'content' => $post->content,
+                'published_at' => $post->published_at,
+                'status' => $post->status,
+            ])
+            ->log('Post created');
     }
 
     /**
