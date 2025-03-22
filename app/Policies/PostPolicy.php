@@ -29,6 +29,10 @@ class PostPolicy
      */
     public function create(User $user): bool
     {
+        if ($user->can('create posts')) {
+            return true;
+        }
+
         return false;
     }
 
@@ -37,6 +41,10 @@ class PostPolicy
      */
     public function update(User $user, Post $post): bool
     {
+        if ($user->can('edit own posts')) {
+            return $user->id === $post->user_id;
+        }
+
         return false;
     }
 
@@ -45,6 +53,10 @@ class PostPolicy
      */
     public function delete(User $user, Post $post): bool
     {
+        if ($user->can('delete own posts')) {
+            return $user->id === $post->user_id;
+        }
+
         return false;
     }
 

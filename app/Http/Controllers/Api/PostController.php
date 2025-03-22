@@ -5,10 +5,10 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StorePostRequest;
 use App\Http\Requests\UpdatePostRequest;
+use App\Http\Resources\PostResource;
 use App\Models\Post;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Gate;
 
 class PostController extends Controller
 {
@@ -33,24 +33,24 @@ class PostController extends Controller
      */
     public function store(StorePostRequest $request): JsonResponse
     {
+        Gate::authorize('create', Post::class);
+
         $validatedData = $request->validated();
         $validatedData['image'] = $request->file('image')->store('images');
 
-        DB::transaction(function () use ($validatedData) {
-            $post = Post::create([
-                'title' => $validatedData['title'],
-                'content' => $validatedData['content'],
-                'image' => $validatedData['image'],
-                'published_at' => $validatedData['published_at'],
-                'status' => $validatedData['status'],
-                'user_id' => auth()->user()->id,
-            ]);
-
-            $post->update(['slug' => Str::slug($validatedData['title'] . '-' . $post->id)]);
-        });
+        $post = Post::create([
+            'user_id' => auth()->user()->id,
+            'title' => $validatedData['title'],
+            'content' => $validatedData['content'],
+            'image' => $validatedData['image'],
+            'published_at' => $validatedData['published_at'],
+            'status' => $validatedData['status'],
+        ]);
 
         return response()->json([
+            'status' => true,
             'message' => 'Post created successfully',
+            'data' => new PostResource($post)
         ], 201);
     }
 

@@ -18,11 +18,11 @@ class PermissionSeeder extends Seeder
         $userRole = Role::create(['name' => 'user']);
 
         $createPosts = Permission::create(['name' => 'create posts']);
-        $editPosts = Permission::create(['name' => 'edit posts']);
-        $deletePosts = Permission::create(['name' => 'delete posts']);
+        $editOwnPosts = Permission::create(['name' => 'edit own posts']);
+        $deleteOwnPosts = Permission::create(['name' => 'delete own posts']);
 
         $adminPermissions = Permission::all();
-        $writerPermissions = [$createPosts, $editPosts, $deletePosts];
+        $writerPermissions = [$createPosts, $editOwnPosts, $deleteOwnPosts];
         $userPermissions = [];
 
         $adminRole->givePermissionTo($adminPermissions);
