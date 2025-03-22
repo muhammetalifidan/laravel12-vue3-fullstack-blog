@@ -75,7 +75,7 @@ class CommentPolicy
         return false;
     }
 
-    public function approve(User $user, Comment $comment): bool
+    public function updateStatus(User $user, Comment $comment): bool
     {
         return false;
     }

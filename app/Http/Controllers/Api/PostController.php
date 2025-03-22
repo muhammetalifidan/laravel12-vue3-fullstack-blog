@@ -6,6 +6,7 @@ use App\Enums\PostStatusType;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StorePostRequest;
 use App\Http\Requests\UpdatePostRequest;
+use App\Http\Requests\UpdatePostStatusRequest;
 use App\Http\Resources\PostResource;
 use App\Models\Post;
 use Illuminate\Http\JsonResponse;
@@ -141,6 +142,23 @@ class PostController extends Controller
         return response()->json([
             'status' => true,
             'message' => 'Post deleted successfully'
+        ]);
+    }
+
+    public function updateStatus(UpdatePostStatusRequest $request, Post $post): JsonResponse
+    {
+        Gate::authorize('updateStatus', $post);
+
+        $validatedData = $request->validated();
+
+        $post->update([
+            'status' => $validatedData['status'],
+        ]);
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Post status updated successfully',
+            'data' => new PostResource($post)
         ]);
     }
 }

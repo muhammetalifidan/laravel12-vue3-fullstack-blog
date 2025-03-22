@@ -147,7 +147,7 @@ class CommentController extends Controller
     {
         $validatedData = $request->validated();
 
-        Gate::authorize('approve', $comment);
+        Gate::authorize('updateStatus', $comment);
 
         if ($comment->post_id !== $post->id) {
             return response()->json([

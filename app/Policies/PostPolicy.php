@@ -75,4 +75,9 @@ class PostPolicy
     {
         return false;
     }
+
+    public function updateStatus(User $user, Post $post): bool
+    {
+        return false;
+    }
 }

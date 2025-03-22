@@ -19,5 +19,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::resource('posts', PostController::class)->only(['store', 'update', 'destroy']);
     Route::resource('categories', CategoryController::class)->only(['store', 'update', 'destroy']);
     Route::resource('posts.comments', CommentController::class)->only(['store', 'update', 'destroy']);
+    Route::put('posts/{post}/status', [PostController::class, 'updateStatus'])->name('posts.status');
     Route::put('posts/{post}/comments/{comment}/status', [CommentController::class, 'updateStatus'])->name('posts.comments.status');
 });
