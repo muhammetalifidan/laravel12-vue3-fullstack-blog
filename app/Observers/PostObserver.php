@@ -2,6 +2,7 @@
 
 namespace App\Observers;
 
+use App\Events\PostCreated;
 use App\Models\Post;
 use Illuminate\Support\Str;
 
@@ -13,6 +14,8 @@ class PostObserver
     public function created(Post $post): void
     {
         $post->update(['slug' => Str::slug($post->title . '-' . $post->id)]);
+
+        event(new PostCreated($post));
 
         activity()
             ->performedOn($post)
