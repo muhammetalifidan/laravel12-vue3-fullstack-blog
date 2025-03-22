@@ -9,15 +9,21 @@ use App\Http\Resources\PostResource;
 use App\Models\Post;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Str;
 
 class PostController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(): JsonResponse
     {
-        //
+        $posts = Post::all();
+
+        return response()->json([
+            'status' => true,
+            'data' => PostResource::collection($posts)
+        ]);
     }
 
     /**
@@ -40,6 +46,7 @@ class PostController extends Controller
         $post = Post::create([
             'user_id' => auth()->user()->id,
             'title' => $validatedData['title'],
+            'slug' => Str::slug($validatedData['title'] . '-' . time()),
             'content' => $validatedData['content'],
             'published_at' => $validatedData['published_at'],
             'status' => $validatedData['status'],
@@ -57,9 +64,12 @@ class PostController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Post $post)
+    public function show(Post $post): JsonResponse
     {
-        //
+        return response()->json([
+            'status' => true,
+            'data' => new PostResource($post)
+        ]);
     }
 
     /**
@@ -73,16 +83,45 @@ class PostController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdatePostRequest $request, Post $post)
+    public function update(UpdatePostRequest $request, Post $post): JsonResponse
     {
-        //
+        Gate::authorize('update', $post);
+
+        $validatedData = $request->validated();
+
+        $post->update([
+            'title' => $validatedData['title'],
+            'slug' => Str::slug($validatedData['title'] . '-' . time()),
+            'content' => $validatedData['content'],
+            'published_at' => $validatedData['published_at'],
+            'status' => $validatedData['status'],
+        ]);
+
+        if ($request->hasFile('image')) {
+            $post->clearMediaCollection();
+            $post->addMediaFromRequest('image')->toMediaCollection();
+        }
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Post updated successfully',
+            'data' => new PostResource($post)
+        ]);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Post $post)
+    public function destroy(Post $post): JsonResponse
     {
-        //
+        Gate::authorize('delete', $post);
+
+        $post->clearMediaCollection();
+        $post->delete();
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Post deleted successfully'
+        ]);
     }
 }

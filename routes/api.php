@@ -12,9 +12,11 @@ Route::get('/user', function (Request $request) {
 
 Route::post('/login', [AuthenticatedSessionController::class, 'store']);
 Route::post('/register', [RegisteredUserController::class, 'store']);
+Route::resource('posts', PostController::class)->only(['index', 'show', 'create', 'edit']);
+
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/logout', [AuthenticatedSessionController::class, 'destroy']);
 
-    Route::resource('posts', PostController::class)->except(['index', 'show', 'create', 'edit']);
+    Route::resource('posts', PostController::class)->only(['store', 'update', 'destroy']);
 });
