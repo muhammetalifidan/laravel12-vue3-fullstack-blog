@@ -25,8 +25,8 @@
 - [x] Yorum onaylama
 
 ### Ek Özellikler
-- [ ] Bildirim sistemi
-- [ ] Yeni veri canlı yayın
+- [x] Bildirim sistemi
+- [x] Yeni veri canlı yayın
 - [x] Haftalık veri temizliği (Schedule)
 - [!] Seed veri
 - [!] Activity Log

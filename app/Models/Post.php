@@ -29,7 +29,6 @@ class Post extends Model implements HasMedia
 
     protected $casts = [
         'published_at' => 'datetime',
-        'status' => PostStatusType::class,
     ];
 
     public function user(): BelongsTo

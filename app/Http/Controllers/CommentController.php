@@ -74,12 +74,12 @@ class CommentController extends Controller
      */
     public function show(Post $post, Comment $comment): JsonResponse
     {
-        // if ($comment->post_id !== $post->id) {
-        //     return response()->json([
-        //         'status' => false,
-        //         'message' => 'Comment not found'
-        //     ], 404);
-        // }
+        if ($comment->post_id !== $post->id) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Comment not found'
+            ], 404);
+        }
 
         if ($comment->status !== CommentStatusType::APPROVED->value) {
             return response()->json(['status' => false, 'message' => 'Comment not approved'], 403);

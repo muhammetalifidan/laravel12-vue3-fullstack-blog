@@ -6,6 +6,7 @@ use App\Events\CommentCreated;
 use App\Events\CommentDeleted;
 use App\Events\CommentUpdated;
 use App\Models\Comment;
+use App\Notifications\NewCommentNotification;
 
 class CommentObserver
 {
@@ -15,6 +16,9 @@ class CommentObserver
     public function created(Comment $comment): void
     {
         event(new CommentCreated($comment));
+
+        $author = $comment->post->user;
+        $author->notify(new NewCommentNotification($comment));
 
         activity()
             ->performedOn($comment)

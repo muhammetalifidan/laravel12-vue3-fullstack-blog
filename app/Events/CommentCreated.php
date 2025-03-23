@@ -2,6 +2,7 @@
 
 namespace App\Events;
 
+use App\Http\Resources\CommentResource;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PresenceChannel;
@@ -29,8 +30,15 @@ class CommentCreated
     public function broadcastOn(): array
     {
         return [
-            new Channel('comments'),
+            new Channel('comments.' . $this->comment->post_id),
             new PrivateChannel('user' . $this->comment->user_id)
+        ];
+    }
+
+    public function broadcastWith(): array
+    {
+        return [
+            'comment' => new CommentResource($this->comment)
         ];
     }
 }
