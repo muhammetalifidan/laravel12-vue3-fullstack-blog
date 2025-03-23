@@ -1,10 +1,9 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers;
 
 use App\Enums\CommentStatusType;
 use App\Enums\PostStatusType;
-use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreCommentRequest;
 use App\Http\Requests\UpdateCommentRequest;
 use App\Http\Requests\UpdateCommentStatusRequest;
@@ -19,9 +18,9 @@ class CommentController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(): JsonResponse
+    public function index(Post $post): JsonResponse
     {
-        $comments = Comment::all();
+        $comments = Comment::where('post_id', $post->id)->get();
 
         return response()->json([
             'status' => true,
@@ -75,12 +74,12 @@ class CommentController extends Controller
      */
     public function show(Post $post, Comment $comment): JsonResponse
     {
-        if ($comment->post_id !== $post->id) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Comment not found'
-            ], 404);
-        }
+        // if ($comment->post_id !== $post->id) {
+        //     return response()->json([
+        //         'status' => false,
+        //         'message' => 'Comment not found'
+        //     ], 404);
+        // }
 
         if ($comment->status !== CommentStatusType::APPROVED->value) {
             return response()->json(['status' => false, 'message' => 'Comment not approved'], 403);
