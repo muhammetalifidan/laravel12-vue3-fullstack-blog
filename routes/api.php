@@ -17,10 +17,8 @@ Route::prefix('v1')->group(function () {
 
     Route::middleware('auth:sanctum')->group(function () {
         Route::delete('logout', [AuthenticatedSessionController::class, 'destroy']);
-        Route::get('user', function (Request $request) {
-            return $request->user();
-        });
 
+        Route::get('user', [UserController::class, 'user']);
         Route::get('users/{user}', [UserController::class, 'show']);
         Route::resource('posts', PostController::class)->only(['store', 'update', 'destroy']);
         Route::resource('categories', CategoryController::class)->only(['store', 'update', 'destroy']);

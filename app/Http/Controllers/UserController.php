@@ -11,6 +11,20 @@ use Illuminate\Support\Facades\Gate;
 class UserController extends Controller
 {
     /**
+     * Get the authenticated user.
+     * @param \Illuminate\Http\Request $request
+     * @return JsonResponse|mixed
+     */
+    public function user(Request $request): JsonResponse
+    {
+        return response()->json([
+            'status' => true,
+            'message' => 'User retrieved successfully',
+            'data' => new UserResource($request->user())
+        ]);
+    }
+
+    /**
      * Display a listing of the resource.
      */
     public function index()

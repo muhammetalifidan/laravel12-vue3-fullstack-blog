@@ -22,7 +22,9 @@ class RegisteredUserController extends Controller
 
         return response()->json([
             'message' => 'Registration successful',
-            'token' => $token,
+            'data' => [
+                'token' => $token,
+            ],
         ], 201);
     }
 }
