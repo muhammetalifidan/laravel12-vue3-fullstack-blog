@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Enums\CommentStatusType;
+use App\Enums\PostStatusType;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreCommentRequest;
 use App\Http\Requests\UpdateCommentRequest;
@@ -11,9 +12,7 @@ use App\Http\Resources\CommentResource;
 use App\Models\Comment;
 use App\Models\Post;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Validation\Rule;
 
 class CommentController extends Controller
 {
@@ -44,6 +43,13 @@ class CommentController extends Controller
     public function store(StoreCommentRequest $request, Post $post): JsonResponse
     {
         Gate::authorize('create', Comment::class);
+
+        if ($post->status !== PostStatusType::PUBLISHED->value) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Post not published'
+            ], 403);
+        }
 
         $validatedData = $request->validated();
         $user = auth()->user();
@@ -108,6 +114,13 @@ class CommentController extends Controller
             ], 404);
         }
 
+        if ($post->status !== PostStatusType::PUBLISHED->value) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Post not published'
+            ], 403);
+        }
+
         $validatedData = $request->validated();
 
         $comment->update([
@@ -133,6 +146,13 @@ class CommentController extends Controller
                 'status' => false,
                 'message' => 'Comment not found'
             ], 404);
+        }
+
+        if ($post->status !== PostStatusType::PUBLISHED->value) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Post not published'
+            ], 403);
         }
 
         $comment->delete();
