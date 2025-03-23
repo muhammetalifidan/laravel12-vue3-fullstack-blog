@@ -85,9 +85,7 @@
                     </h1>
 
                     <div class="text-sm text-gray-500 mb-6">
-                        <span
-                            >Yazar: {{ post.user }}</span
-                        >
+                        <span>Yazar: {{ post.user }}</span>
                         <span class="mx-2">•</span>
                         <time :datetime="post.published_at">{{
                             post.published_at
@@ -102,7 +100,7 @@
                         class="border-t border-gray-200 pt-4 flex justify-between items-center"
                     >
                         <div class="text-sm text-gray-500">
-                            {{ post.comments_count }} Yorum
+                            {{ commentsCount }} Yorum
                         </div>
 
                         <div
@@ -129,7 +127,7 @@
             <div class="bg-white shadow rounded-lg overflow-hidden mb-6">
                 <div class="p-6 border-b border-gray-200">
                     <h2 class="text-lg font-medium">
-                        Yorumlar ({{ post.comments_count }})
+                        Yorumlar ({{ commentsCount }})
                     </h2>
                 </div>
 
@@ -196,14 +194,14 @@
 
                 <div class="divide-y divide-gray-200">
                     <div
-                        v-if="post.comments.length === 0"
+                        v-if="comments.length === 0"
                         class="p-6 text-center text-gray-500"
                     >
                         <p>Henüz yorum yapılmamış. İlk yorumu siz yapın!</p>
                     </div>
 
                     <div
-                        v-for="comment in post.comments"
+                        v-for="comment in comments"
                         :key="comment.id"
                         class="p-6"
                     >
@@ -215,11 +213,7 @@
                                     <span
                                         class="text-indigo-800 font-medium text-sm"
                                     >
-                                        {{
-                                            getInitials(
-                                                comment.user
-                                            )
-                                        }}
+                                        {{ getInitials(comment.user) }}
                                     </span>
                                 </div>
                             </div>
@@ -342,7 +336,7 @@
 </template>
 
 <script>
-import { ref, reactive, inject, computed, onMounted } from "vue";
+import { ref, reactive, inject, computed, onMounted, onUnmounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import axios from "axios";
 
@@ -355,7 +349,6 @@ export default {
     },
 
     setup(props) {
-        const route = useRoute();
         const router = useRouter();
         const authState = inject("authState");
 
@@ -386,13 +379,17 @@ export default {
             id: null,
         });
 
+        const commentsCount = computed(() => {
+            return comments.value.length;
+        });
+
         const canEditPost = computed(() => {
             if (!authState.isAuthenticated || !post.value || !authState.user) {
                 return false;
             }
 
             return (
-                post.value.user.id === authState.user.id ||
+                post.value.user_id === authState.user.id ||
                 authState.user.role === "admin"
             );
         });
@@ -463,7 +460,6 @@ export default {
                     response.data.status &&
                     response.data.data
                 ) {
-                    comments.value.unshift(response.data.data);
                     commentForm.body = "";
                 }
             } catch (err) {
@@ -488,7 +484,7 @@ export default {
             }
 
             return (
-                comment.user.id === authState.user.id ||
+                comment.user_id === authState.user.id ||
                 authState.user.role === "admin"
             );
         };
@@ -582,15 +578,53 @@ export default {
             }
         };
 
-        const getInitials = (firstName, lastName) => {
-            return `${firstName?.charAt(0) || ""}${
-                lastName?.charAt(0) || ""
-            }`.toUpperCase();
+        const getInitials = (name) => {
+            if (!name) return "";
+
+            if (name.includes(" ")) {
+                const nameParts = name.split(" ");
+                return `${nameParts[0].charAt(0)}${nameParts[1].charAt(
+                    0
+                )}`.toUpperCase();
+            }
+
+            return name.substring(0, 2).toUpperCase();
+        };
+
+        const setupEcho = () => {
+            if (window.Echo) {
+                window.Echo.channel(`comments.${props.id}`).listen(
+                    "CommentCreated",
+                    (e) => {
+                        console.log("New comment received:", e);
+                        if (e.comment) {
+                            fetchComments();
+                        }
+                    }
+                );
+
+                console.log(`Listening to comments.${props.id} channel`);
+            } else {
+                console.error(
+                    "Echo is not defined. Real-time comments will not work."
+                );
+            }
+        };
+
+        const cleanupEcho = () => {
+            if (window.Echo) {
+                window.Echo.leave(`comments.${props.id}`);
+            }
         };
 
         onMounted(() => {
             fetchPost();
             fetchComments();
+            setupEcho();
+        });
+
+        onUnmounted(() => {
+            cleanupEcho();
         });
 
         return {
@@ -609,6 +643,7 @@ export default {
             showDeleteModal,
             deleteModalContent,
             deleteSubmitting,
+            commentsCount,
             canEditPost,
             fetchPost,
             fetchComments,
