@@ -174,11 +174,11 @@
 import { ref, reactive, inject } from "vue";
 import { useRouter } from "vue-router";
 import axios from "axios";
-import { mask } from 'vue-the-mask';
+import { mask } from "vue-the-mask";
 
 export default {
     directives: {
-        mask
+        mask,
     },
 
     setup(props, { emit }) {
@@ -206,7 +206,11 @@ export default {
             });
 
             try {
-                const response = await axios.post("/api/v1/register", form);
+                const formData = { ...form };
+
+                formData.phone = formData.phone.replace(/\D/g, "");
+
+                const response = await axios.post("/api/v1/register", formData);
 
                 if (
                     response.data &&
