@@ -1,21 +1,27 @@
 import { createRouter, createWebHistory } from "vue-router";
-
 import Home from "../views/Home.vue";
 import Login from "../views/auth/Login.vue";
 import Register from "../views/auth/Register.vue";
-import PostList from '../views/posts/PostList.vue';
-import PostDetail from '../views/posts/PostDetail.vue';
-import PostCreate from '../views/posts/PostCreate.vue';
-import PostEdit from '../views/posts/PostEdit.vue';
-import CategoryList from '../views/categories/CategoryList.vue';
+import PostList from "../views/posts/PostList.vue";
+import PostDetail from "../views/posts/PostDetail.vue";
+import PostCreate from "../views/posts/PostCreate.vue";
+import PostEdit from "../views/posts/PostEdit.vue";
+import CategoryList from "../views/categories/CategoryList.vue";
 
 const requireAuth = (to, from, next) => {
-    const token = localStorage.getItem('auth_token');
+    const token = localStorage.getItem("auth_token");
     if (!token) {
-        next({ name: 'login' });
-    } else {
-        next();
+        return next({ name: "login" });
     }
+    next();
+};
+
+const requireGuest = (to, from, next) => {
+    const token = localStorage.getItem("auth_token");
+    if (token) {
+        return next({ name: "home" });
+    }
+    next();
 };
 
 const routes = [
@@ -28,11 +34,13 @@ const routes = [
         path: "/login",
         name: "login",
         component: Login,
+        beforeEnter: requireGuest,
     },
     {
         path: "/register",
         name: "register",
         component: Register,
+        beforeEnter: requireGuest,
     },
     {
         path: "/posts",

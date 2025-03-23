@@ -22,8 +22,9 @@
                                         ? 'border-indigo-500 text-gray-900'
                                         : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300',
                                 ]"
-                                >Ana Sayfa</router-link
                             >
+                                Ana Sayfa
+                            </router-link>
                             <router-link
                                 to="/posts"
                                 class="inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
@@ -32,8 +33,9 @@
                                         ? 'border-indigo-500 text-gray-900'
                                         : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300',
                                 ]"
-                                >Yazılar</router-link
                             >
+                                Yazılar
+                            </router-link>
                             <router-link
                                 to="/categories"
                                 class="inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
@@ -42,8 +44,9 @@
                                         ? 'border-indigo-500 text-gray-900'
                                         : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300',
                                 ]"
-                                >Kategoriler</router-link
                             >
+                                Kategoriler
+                            </router-link>
                             <router-link
                                 v-if="isAuthenticated"
                                 to="/posts/create"
@@ -53,8 +56,9 @@
                                         ? 'border-indigo-500 text-gray-900'
                                         : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300',
                                 ]"
-                                >Yazı Oluştur</router-link
                             >
+                                Yazı Oluştur
+                            </router-link>
                         </div>
                     </div>
                     <div class="hidden sm:ml-6 sm:flex sm:items-center">
@@ -92,14 +96,17 @@
 
         <div class="py-6">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <router-view />
+                <router-view
+                    @login-success="fetchUserData"
+                    @register-success="fetchUserData"
+                />
             </div>
         </div>
     </div>
 </template>
 
 <script>
-import { ref, computed, onMounted } from "vue";
+import { ref, reactive, computed, onMounted, provide } from "vue";
 import { useRouter } from "vue-router";
 import axios from "axios";
 
@@ -107,40 +114,89 @@ export default {
     setup() {
         const router = useRouter();
         const user = ref(null);
-        const isAuthenticated = computed(() => {
-            return !!localStorage.getItem("auth_token");
+        const loading = ref(false);
+        const authState = reactive({
+            isAuthenticated: !!localStorage.getItem("auth_token"),
+            user: null,
         });
 
-        const logout = async () => {
-            try {
-                await axios.delete("/logout");
-                localStorage.removeItem("auth_token");
-                user.value = null;
-                router.push("/login");
-            } catch (error) {
-                console.error("Çıkış yapılırken hata oluştu:", error);
+        const isAuthenticated = computed(() => {
+            return authState.isAuthenticated;
+        });
+
+        const fetchUserData = async (force = false) => {
+            if (authState.user && !force) {
+                console.log("User data already exists, skipping fetch");
+                return;
+            }
+
+            if (localStorage.getItem("auth_token")) {
+                loading.value = true;
+                try {
+                    console.log("Fetching user data...");
+                    const response = await axios.get("/api/v1/user");
+                    if (
+                        response.data &&
+                        response.data.status &&
+                        response.data.data
+                    ) {
+                        user.value = response.data.data;
+                        authState.user = response.data.data;
+                        authState.isAuthenticated = true;
+                        console.log(
+                            "User data fetched successfully:",
+                            user.value
+                        );
+                    } else {
+                        console.error(
+                            "Unexpected response format:",
+                            response.data
+                        );
+                        throw new Error("Invalid response format");
+                    }
+                } catch (error) {
+                    console.error("Failed to fetch user data:", error);
+                    if (error.response && error.response.status === 401) {
+                        handleLogout();
+                    }
+                } finally {
+                    loading.value = false;
+                }
             }
         };
 
-        onMounted(async () => {
-            if (isAuthenticated.value) {
-                try {
-                    const response = await axios.get("/user");
-                    user.value = response.data.data;
-                } catch (error) {
-                    console.error("Kullanıcı bilgileri alınamadı:", error);
-                    if (error.response && error.response.status === 401) {
-                        localStorage.removeItem("auth_token");
-                        router.push("/login");
-                    }
-                }
+        const logout = async () => {
+            try {
+                await axios.delete("/api/v1/logout");
+                handleLogout();
+            } catch (error) {
+                console.error("Logout error:", error);
+                handleLogout();
             }
+        };
+
+        const handleLogout = () => {
+            localStorage.removeItem("auth_token");
+            user.value = null;
+            authState.user = null;
+            authState.isAuthenticated = false;
+            router.push("/login");
+        };
+
+        provide("authState", authState);
+        provide("logout", logout);
+        provide("fetchUserData", fetchUserData);
+
+        onMounted(() => {
+            fetchUserData();
         });
 
         return {
             user,
             isAuthenticated,
+            loading,
             logout,
+            fetchUserData,
         };
     },
 };
