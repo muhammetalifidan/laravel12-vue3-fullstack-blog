@@ -9,6 +9,7 @@ use App\Http\Requests\UpdatePostStatusRequest;
 use App\Http\Resources\PostResource;
 use App\Models\Post;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
@@ -18,9 +19,34 @@ class PostController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
-        $posts = Post::all();
+        $per_page = $request->input('per_page', 9);
+        $sort = $request->input('sort', 'newest');
+        $search = $request->input('search');
+        $category = $request->input('category');
+
+        $query = Post::query();
+
+        if ($search) {
+            $query->where('title', 'like', "%{$search}%");
+        }
+
+        if ($category) {
+            $query->whereHas('categories', function ($query) use ($category) {
+                $query->where('categories.id', $category);
+            });
+        }
+
+        if ($sort === 'newest') {
+            $query->orderBy('published_at', 'desc');
+        } elseif ($sort === 'oldest') {
+            $query->orderBy('published_at', 'asc');
+        } elseif ($sort === 'most_commented') {
+            $query->withCount('comments')->orderBy('comments_count', 'desc');
+        }
+
+        $posts = $query->paginate($per_page);
 
         return response()->json([
             'status' => true,
