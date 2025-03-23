@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use App\Enums\PostStatusType;
 use App\Models\Post;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -24,7 +25,7 @@ class PostFactory extends Factory
             'content' => fake()->paragraph(10),
             'published_at' => fake()->dateTimeBetween('-1 week', '+1 week'),
             'status' => fake()->randomElement(PostStatusType::cases())->value,
-            'user_id' => fake()->numberBetween(1, 3),
+            'user_id' => User::role('writer')->get()->random()->id,
         ];
     }
 

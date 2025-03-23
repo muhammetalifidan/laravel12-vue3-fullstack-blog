@@ -6,6 +6,7 @@ use App\Enums\PostStatusType;
 use App\Http\Requests\StorePostRequest;
 use App\Http\Requests\UpdatePostRequest;
 use App\Http\Requests\UpdatePostStatusRequest;
+use App\Http\Resources\PostListResource;
 use App\Http\Resources\PostResource;
 use App\Models\Post;
 use Illuminate\Http\JsonResponse;
@@ -26,7 +27,7 @@ class PostController extends Controller
         $search = $request->input('search');
         $category = $request->input('category');
 
-        $query = Post::query();
+        $query = Post::query()->published();
 
         if ($search) {
             $query->where('title', 'like', "%{$search}%");
@@ -50,7 +51,7 @@ class PostController extends Controller
 
         return response()->json([
             'status' => true,
-            'data' => PostResource::collection($posts)
+            'data' => PostListResource::collection($posts)
         ]);
     }
 

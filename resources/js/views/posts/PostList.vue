@@ -225,8 +225,7 @@
                         <div class="flex items-center">
                             <span class="mr-1">Yazar:</span>
                             <span class="font-medium text-gray-900"
-                                >{{ post.user.first_name }}
-                                {{ post.user.last_name }}</span
+                                >{{ post.user }}</span
                             >
                         </div>
                         <span class="mx-2">•</span>

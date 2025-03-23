@@ -22,18 +22,7 @@ class CommentResource extends JsonResource
             'created_at' => $this->created_at->format('d-m-Y H:i:s'),
             'updated_at' => $this->updated_at->format('d-m-Y H:i:s'),
             'deleted_at' => $this->deleted_at?->format('d-m-Y H:i:s'),
-            'user' => [
-                'id' => $this->user_id,
-                'first_name' => $this->user->first_name,
-                'last_name' => $this->user->last_name,
-                'email' => $this->user->email,
-            ],
-            'post' => [
-                'id' => $this->post_id,
-                'title' => $this->post->title,
-                'slug' => $this->post->slug,
-                'status' => $this->post->status,
-            ]
+            'user' => $this->user->first_name . ' ' . $this->user->last_name
         ];
     }
 }

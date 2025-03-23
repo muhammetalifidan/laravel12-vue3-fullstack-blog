@@ -5,7 +5,7 @@ namespace App\Http\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class PostResource extends JsonResource
+class PostListResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -20,13 +20,11 @@ class PostResource extends JsonResource
             'slug' => $this->slug,
             'content' => $this->content,
             'image' => $this->getMedia()->first() ? $this->getMedia()->first()->getUrl() : null,
-            'published_at' => $this->published_at->format('d-m-Y'),
+            'published_at' => $this->published_at,
             'status' => $this->status,
             'user' => $this->user->first_name . ' ' . $this->user->last_name,
             'categories' => CategoryResource::collection($this->categories),
             'comments_count' => $this->comments->count(),
-            'comments' => CommentResource::collection($this->comments),
-            'created_at' => $this->created_at->format('d-m-Y'),
         ];
     }
 }
