@@ -28,10 +28,10 @@
 - [x] Bildirim sistemi
 - [x] Yeni veri canlı yayın
 - [x] Haftalık veri temizliği (Schedule)
-- [!] Seed veri
-- [!] Activity Log
-- [x] Postman collection
-- [x] Github repository
+- [x] Seed veri
+- [x] Activity Log
+- [!] Postman collection
+- [!] Github repository
 
 ## API Route
 

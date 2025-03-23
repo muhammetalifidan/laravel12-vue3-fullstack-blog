@@ -35,15 +35,12 @@ class PostObserver
     {
         event(new PostUpdated($post));
 
+        $changedAttributes = $post->getChanges();
+        unset($changedAttributes['updated_at']);
+
         activity()
             ->performedOn($post)
-            ->withProperties([
-                'user_id' => $post->user_id,
-                'title' => $post->title,
-                'content' => $post->content,
-                'published_at' => $post->published_at,
-                'status' => $post->status,
-            ])
+            ->withProperties($changedAttributes)
             ->log('Post updated');
     }
 

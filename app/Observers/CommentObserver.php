@@ -38,14 +38,12 @@ class CommentObserver
     {
         event(new CommentUpdated($comment));
 
+        $changedAttributes = $comment->getChanges();
+        unset($changedAttributes['updated_at']);
+
         activity()
             ->performedOn($comment)
-            ->withProperties([
-                'user_id' => $comment->user_id,
-                'post_id' => $comment->post_id,
-                'body' => $comment->body,
-                'status' => $comment->status,
-            ])
+            ->withProperties($changedAttributes)
             ->log('Comment updated');
     }
 

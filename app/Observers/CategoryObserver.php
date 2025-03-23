@@ -33,13 +33,12 @@ class CategoryObserver
     {
         event(new CategoryUpdated($category));
 
+        $changedAttributes = $category->getChanges();
+        unset($changedAttributes['updated_at']);
+
         activity()
             ->performedOn($category)
-            ->withProperties([
-                'user_id' => $category->user_id,
-                'name' => $category->name,
-                'slug' => $category->slug,
-            ])
+            ->withProperties($changedAttributes)
             ->log('Category updated');
     }
 
