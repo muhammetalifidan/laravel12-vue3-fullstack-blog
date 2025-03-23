@@ -5,6 +5,7 @@ use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
@@ -17,6 +18,7 @@ Route::prefix('v1')->group(function () {
     Route::middleware('auth:sanctum')->group(function () {
         Route::delete('logout', [AuthenticatedSessionController::class, 'destroy']);
 
+        Route::get('users/{user}', [UserController::class, 'show']);
         Route::resource('posts', PostController::class)->only(['store', 'update', 'destroy']);
         Route::resource('categories', CategoryController::class)->only(['store', 'update', 'destroy']);
         Route::resource('posts.comments', CommentController::class)->only(['store', 'update', 'destroy']);
