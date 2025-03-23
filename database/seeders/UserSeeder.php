@@ -12,17 +12,17 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        User::factory()->create([
+        User::factory()->createQuietly([
             'email' => 'user@example.com',
             'password' => 'password',
         ])->assignRole('user');
 
-        User::factory()->create([
+        User::factory()->createQuietly([
             'email' => 'writer@example.com',
             'password' => 'password',
         ])->assignRole('writer');
 
-        User::factory()->create([
+        User::factory()->createQuietly([
             'email' => 'admin@example.com',
             'password' => 'password',
         ])->assignRole('admin');

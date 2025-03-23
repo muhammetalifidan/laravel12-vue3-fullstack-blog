@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Events\UserLoggedIn;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\LoginRequest;
 use Illuminate\Http\JsonResponse;
@@ -19,6 +20,8 @@ class AuthenticatedSessionController extends Controller
         $request->authenticate();
 
         $token = $request->user()->createToken('auth-token')->plainTextToken;
+
+        event(new UserLoggedIn($request->user()));
 
         return response()->json([
             'message' => 'Login successful',
